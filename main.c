@@ -4,15 +4,19 @@
 #include <unistd.h>
 typedef char byte;
 
+#define FLUSH_TRIGGER "FLUSH"
 #define N_LEDS 24
-#define BUFF_N N_LEDS*3+1
-byte buff[BUFF_N];
-
-char filename[256];
 
 int main(int argc, char **argv)
 {
   FILE *fp = 0;
+  char filename[256];
+  byte *buff;
+  int buff_n;
+
+  buff_n = N_LEDS*3+strlen(FLUSH_TRIGGER)+1;
+  buff = (byte *)malloc(sizeof(byte)*buff_n);
+  strcpy(buff+(buff_n-strlen(FLUSH_TRIGGER)),FLUSH_TRIGGER);
 
   while(!fp)
   {
@@ -23,7 +27,6 @@ int main(int argc, char **argv)
     fp = fopen(filename,"a");
   }
 
-  buff[BUFF_N-1] = '\0';
   while(1)
   {
     for(int i = 0; i < N_LEDS; i++)
@@ -32,9 +35,9 @@ int main(int argc, char **argv)
       buff[i*3+1] = rand()%255;
       buff[i*3+2] = rand()%255;
     }
-    if(fwrite(buff,sizeof(byte),BUFF_N,fp) != BUFF_N) break;
+    if(fwrite(buff,sizeof(byte),buff_n,fp) != buff_n) break;
     fflush(fp);
-    sleep(10);
+    sleep(1);
   }
 
   fclose(fp);
