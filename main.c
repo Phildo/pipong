@@ -5,7 +5,7 @@
 typedef char byte;
 
 #define FLUSH_TRIGGER "FLUSH"
-#define N_LEDS 24
+#define STRIP_NUM_LEDS 24
 
 int main(int argc, char **argv)
 {
@@ -14,8 +14,8 @@ int main(int argc, char **argv)
   byte *buff;
   int buff_n;
 
-  buff_n = N_LEDS*3+strlen(FLUSH_TRIGGER)+1;
-  buff = (byte *)malloc(sizeof(byte)*buff_n);
+  buff_n = STRIP_NUM_LEDS*3+strlen(FLUSH_TRIGGER);
+  buff = (byte *)malloc(sizeof(byte)*buff_n+1);
   strcpy(buff+(buff_n-strlen(FLUSH_TRIGGER)),FLUSH_TRIGGER);
 
   while(!fp)
@@ -29,11 +29,11 @@ int main(int argc, char **argv)
 
   while(1)
   {
-    for(int i = 0; i < N_LEDS; i++)
+    for(int i = 0; i < STRIP_NUM_LEDS; i++)
     {
-      buff[i*3+0] = rand()%255;
-      buff[i*3+1] = rand()%255;
-      buff[i*3+2] = rand()%255;
+      buff[i*3+0] = rand()%55;
+      buff[i*3+1] = rand()%55;
+      buff[i*3+2] = rand()%55;
     }
     if(fwrite(buff,sizeof(byte),buff_n,fp) != buff_n) break;
     fflush(fp);
