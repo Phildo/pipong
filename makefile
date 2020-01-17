@@ -1,3 +1,3 @@
 run:
-	gcc main.c && ./a.out
+	gcc main.c && sudo ./a.out /dev/ttyACM0
 
