@@ -1,3 +1,14 @@
-run:
-	gcc main.c && sudo ./a.out /dev/ttyACM0
+OUT=a.out
+SRC=*.c
+HRC=*.h
+TTY=/dev/ttyACM*
+
+$(OUT): $(SRC) $(HRC)
+	gcc $(SRC) -o $(OUT)
+
+push: $(OUT)
+	./$(OUT) $(TTY)
+
+run: $(OUT)
+	./$(OUT)
 

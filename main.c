@@ -4,12 +4,23 @@
 #include <unistd.h>
 typedef char byte;
 
+#define FORCE_SERIAL
+
+#ifdef FORCE_SERIAL
+#include "wiringserial.h"
+#endif
+
 #define FLUSH_TRIGGER "FLUSH"
 #define STRIP_NUM_LEDS 24
+#define BAUD_RATE 115200
 
 int main(int argc, char **argv)
 {
+  #ifdef FORCE_SERIAL
+  int fp = 0;
+  #else
   FILE *fp = 0;
+  #endif
   char filename[256];
   byte *buff;
   int buff_n;
@@ -22,7 +33,11 @@ int main(int argc, char **argv)
   if(argc == 2)
   {
     strcpy(filename,argv[1]);
+    #ifdef FORCE_SERIAL
+    fp = serialOpen(filename, BAUD_RATE);
+    #else
     fp = fopen(filename,"a");
+    #endif
   }
   while(!fp)
   {
@@ -30,7 +45,11 @@ int main(int argc, char **argv)
 
     if(fgets(filename, sizeof(filename), stdin) != filename) exit(1);
     filename[strlen(filename)-1] = '\0';
+    #ifdef FORCE_SERIAL
+    fp = serialOpen(filename, BAUD_RATE);
+    #else
     fp = fopen(filename,"a");
+    #endif
   }
 
   int step = 0;
@@ -41,9 +60,9 @@ int main(int argc, char **argv)
     buff[step*3+2] = 0;
     step++;
     if(step == STRIP_NUM_LEDS) step = 0;
-    buff[step*3+0] = 20;
+    buff[step*3+0] = 0;
     buff[step*3+1] = 20;
-    buff[step*3+2] = 20;
+    buff[step*3+2] = 0;
     /*
     for(int i = 0; i < STRIP_NUM_LEDS; i++)
     {
@@ -52,11 +71,20 @@ int main(int argc, char **argv)
       buff[i*3+2] = rand()%55;
     }
     */
+    #ifdef FORCE_SERIAL
+    serialPutns(fp,buff,buff_n);
+    serialFlush(fp);
+    #else
     if(fwrite(buff,sizeof(byte),buff_n,fp) != buff_n) break;
     fflush(fp);
-    sleep(1);
+    #endif
+    for(int i = 0; i < 2000000; i++) ;
   }
 
+  #ifdef FORCE_SERIAL
+  serialClose(fp);
+  #else
   fclose(fp);
+  #endif
 }
 
