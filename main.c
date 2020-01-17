@@ -10,9 +10,32 @@ typedef char byte;
 #include "wiringserial.h"
 #endif
 
+//#define RING
+//#define STRIP
+#define BIGSTRIP
+
+#define LUT
+#define COMPRESS
+
 #define FLUSH_TRIGGER "FLUSH"
-#define STRIP_NUM_LEDS 24
+#ifdef RING
+  #define STRIP_LED_PIN     2
+  #define STRIP_NUM_LEDS    24
+  #define STRIP_BRIGHTNESS  32 //0-128
+  #define STRIP_LED_TYPE    WS2812
+#elif defined STRIP
+  #define STRIP_LED_PIN     3
+  #define STRIP_NUM_LEDS    100
+  #define STRIP_BRIGHTNESS  128 //0-128
+  #define STRIP_LED_TYPE    WS2811
+#elif defined BIGSTRIP
+  #define STRIP_LED_PIN     2
+  #define STRIP_NUM_LEDS    100
+  #define STRIP_BRIGHTNESS  32 //0-128
+  #define STRIP_LED_TYPE    WS2812
+#endif
 #define BAUD_RATE 115200
+//#define BAUD_RATE 230400
 
 int main(int argc, char **argv)
 {
@@ -25,7 +48,15 @@ int main(int argc, char **argv)
   byte *buff;
   int buff_n;
 
+  #ifdef LUT
+    #ifdef COMPRESS
+  buff_n = STRIP_NUM_LEDS/2+strlen(FLUSH_TRIGGER);
+    #else
+  buff_n = STRIP_NUM_LEDS+strlen(FLUSH_TRIGGER);
+    #endif
+  #else
   buff_n = STRIP_NUM_LEDS*3+strlen(FLUSH_TRIGGER);
+  #endif
   buff = (byte *)malloc(sizeof(byte)*buff_n+1);
   memset(buff,0,sizeof(byte)*buff_n+1);
   strcpy(buff+(buff_n-strlen(FLUSH_TRIGGER)),FLUSH_TRIGGER);
@@ -55,6 +86,31 @@ int main(int argc, char **argv)
   int step = 0;
   while(1)
   {
+    #ifdef LUT
+      #ifdef COMPRESS
+    if(step%2 == 0)
+    {
+      int i = step/2;
+      buff[i] = 0x10;
+      step++;
+      if(step == STRIP_NUM_LEDS) step = 0;
+    }
+    else
+    {
+      int i = step/2;
+      buff[i] &= 0x0F;
+      step++;
+      if(step == STRIP_NUM_LEDS) { step = 0; i = -1; }
+      buff[i+1] &= 0xF0;
+      buff[i+1] |= 0x01;
+    }
+      #else
+    buff[step] = 0;
+    step++;
+    if(step == STRIP_NUM_LEDS) step = 0;
+    buff[step] = 1;
+      #endif
+    #else
     buff[step*3+0] = 0;
     buff[step*3+1] = 0;
     buff[step*3+2] = 0;
@@ -63,14 +119,8 @@ int main(int argc, char **argv)
     buff[step*3+0] = 0;
     buff[step*3+1] = 20;
     buff[step*3+2] = 0;
-    /*
-    for(int i = 0; i < STRIP_NUM_LEDS; i++)
-    {
-      buff[i*3+0] = rand()%55;
-      buff[i*3+1] = rand()%55;
-      buff[i*3+2] = rand()%55;
-    }
-    */
+    #endif
+
     #ifdef FORCE_SERIAL
     serialPutns(fp,buff,buff_n);
     serialFlush(fp);
@@ -78,7 +128,8 @@ int main(int argc, char **argv)
     if(fwrite(buff,sizeof(byte),buff_n,fp) != buff_n) break;
     fflush(fp);
     #endif
-    for(int i = 0; i < 2000000; i++) ;
+    usleep(10000);
+    //for(int i = 0; i < 2000000; i++) ;
   }
 
   #ifdef FORCE_SERIAL
