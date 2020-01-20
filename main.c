@@ -29,13 +29,13 @@ typedef char byte;
   #define STRIP_LED_TYPE WS2812
 #endif
 //#define BAUD_RATE 9600
-#define BAUD_RATE 115200
+//#define BAUD_RATE 115200
 //#define BAUD_RATE 230400
 //#define BAUD_RATE 460800
 //#define BAUD_RATE 500000
 //#define BAUD_RATE 576000
 //#define BAUD_RATE 921600
-//#define BAUD_RATE 1000000
+#define BAUD_RATE 1000000
 //#define BAUD_RATE 1152000
 //#define BAUD_RATE 1500000
 //#define BAUD_RATE 2000000
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     fflush(fp);
     #endif
 
-    for(int i = 0; i < 4000000; i++) ;
+    for(int i = 0; i < 800000; i++) ;
     //sleep(1);
   }
 
