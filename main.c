@@ -28,6 +28,7 @@ typedef char byte;
   #define STRIP_NUM_LEDS 300
   #define STRIP_LED_TYPE WS2812
 #endif
+//#define BAUD_RATE 9600
 #define BAUD_RATE 115200
 //#define BAUD_RATE 230400
 //#define BAUD_RATE 460800

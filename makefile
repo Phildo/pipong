@@ -1,8 +1,8 @@
 OUT=a.out
 SRC=*.c
 HRC=*.h
-#TTY=/dev/ttyACM*
-TTY=/dev/ttyUSB0
+TTY=/dev/ttyACM*
+#TTY=/dev/ttyUSB0
 
 $(OUT): $(SRC) $(HRC)
 	gcc $(SRC) -o $(OUT)
