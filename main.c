@@ -11,8 +11,8 @@ typedef char byte;
 #endif
 
 //#define RING
-#define STRIP
-//#define BIGSTRIP
+//#define STRIP
+#define BIGSTRIP
 
 #define LUT
 #define COMPRESS
@@ -68,6 +68,25 @@ int main(int argc, char **argv)
   memset(buff,0,sizeof(byte)*buff_n+1);
   strcpy(buff+(buff_n-strlen(FLUSH_TRIGGER)),FLUSH_TRIGGER);
 
+  #ifdef LUT
+    #ifdef COMPRESS
+  for(int i = 0; i < STRIP_NUM_LEDS/2; i++)
+  {
+    switch(i%8)
+    {
+      case 0: buff[i] = 0x10; break;
+      case 1: buff[i] = 0x32; break;
+      case 2: buff[i] = 0x54; break;
+      case 3: buff[i] = 0x76; break;
+      case 4: buff[i] = 0x98; break;
+      case 5: buff[i] = 0xBA; break;
+      case 6: buff[i] = 0xDC; break;
+      case 7: buff[i] = 0xFE; break;
+    }
+  }
+    #endif
+  #endif
+
   if(argc == 2)
   {
     strcpy(filename,argv[1]);
@@ -95,6 +114,22 @@ int main(int argc, char **argv)
   {
     #ifdef LUT
       #ifdef COMPRESS
+        #if 1
+    for(int i = 0; i < STRIP_NUM_LEDS/2; i++)
+    {
+      switch(buff[i])
+      {
+        case 0x10: buff[i] = 0x32; break;
+        case 0x32: buff[i] = 0x54; break;
+        case 0x54: buff[i] = 0x76; break;
+        case 0x76: buff[i] = 0x98; break;
+        case 0x98: buff[i] = 0xBA; break;
+        case 0xBA: buff[i] = 0xDC; break;
+        case 0xDC: buff[i] = 0xFE; break;
+        case 0xFE: buff[i] = 0x10; break;
+      }
+    }
+        #else
     if(step%2 == 0)
     {
       int i = step/2;
@@ -111,6 +146,7 @@ int main(int argc, char **argv)
       buff[i+1] &= 0xF0;
       buff[i+1] |= 0x01;
     }
+        #endif
       #else
     buff[step] = 0;
     step++;
@@ -136,7 +172,8 @@ int main(int argc, char **argv)
     fflush(fp);
     #endif
 
-    for(int i = 0; i < 800000; i++) ;
+    //for(int i = 0; i < 16400000; i++) ;
+    usleep(1000*50);
     //sleep(1);
   }
 
